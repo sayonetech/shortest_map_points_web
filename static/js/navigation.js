@@ -1,19 +1,67 @@
 var map = L.map('mapid', {
   // Set latitude and longitude of the map center (required)
-  center: [44.404096,8.93136,],
+  center: [44.40784915911196,8.91870975494385,],
   // Set the initial zoom level, values 0-18, where 0 is most zoomed-out (required)
-  zoom: 13
+  zoom: 15
 });
 var OpenStreetMap_Mapnik = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    minZoom: 13,
+    minZoom: 14,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
 var markerGroup = L.layerGroup().addTo(map)
+var outlineLayer = L.layerGroup().addTo(map)
 let counter = 1;
 let totalCount;
 
+/*Legend specific*/
+var legend = L.control({ position: "bottomleft" });
+
+legend.onAdd = function(map) {
+  var div = L.DomUtil.create("div", "legend");
+  div.innerHTML += "<h4>Legend</h4>";
+  div.innerHTML += '<i style="background: #d86287"></i><span>POI</span><br>';
+  div.innerHTML += '<i style="background: #2a7bca"></i><span>sferiche POI</span><br>';
+  return div;
+};
+
+legend.addTo(map);
+
+// Outline code
+var states = [{
+  "type": "Feature",
+  "properties": {"party": "TargetArea"},
+  "geometry": {
+      "type": "Polygon",
+      "coordinates": [[
+        [8.93250037596431,44.4001927068866,],
+        [8.93251915434896,44.4002114574692,],
+        [8.93264102350633,44.4005427227063,],
+        [8.93296888551486,44.4016068879066,],
+        [8.93353305320102,44.4029207908389,],
+        [8.93377140851251,44.4034737308164,],
+        [8.93410018431521,44.4044164885861,],
+        [8.933416356549,44.4131381389407,],
+        [8.92197593613767,44.4178831858091,],
+        [8.92142531382144,44.4180851176621,],
+        [8.89949943499537,44.4151922533263,],
+        [8.89902595484208,44.4148296797884,],
+        [8.89724056903776,44.4074085713183,],
+        [8.89757822642163,44.4067856557406,],
+      ]]
+  }
+}];
+
+L.geoJSON(states, {
+  style: function(feature) {
+      switch (feature.properties.party) {
+          case 'TargetArea':   return {color: "#0000ff"};
+      }
+  }
+}).addTo(outlineLayer);
+
+// To draw shortest path
 function drawShortestPath(path) {
   totalCount = path.spheriche.length;
   var traceGeojson = {
@@ -49,6 +97,7 @@ function drawShortestPath(path) {
     },
   }).addTo(markerGroup);
 }
+
 function getCookie(name) {
   var dc = document.cookie;
   var prefix = name + "=";
@@ -69,6 +118,8 @@ function getCookie(name) {
   //return unescape(dc.substring(begin + prefix.length, end));
   return decodeURI(dc.substring(begin + prefix.length, end));
 }
+
+// Marker specific logic and API call
 var theMarker = {};
 var theSecondMarker = {};
 var csrftoken = getCookie('csrftoken')
