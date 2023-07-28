@@ -2,6 +2,7 @@ import json
 import os
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView, View
 from applications.navigator.find_shortest_path import get_sferiche_pois, get_sferiche_selected_points, get_data_from_url
 
@@ -22,7 +23,7 @@ def convert_to_coordinates_list(all_result):
 
 # Create your views here.
 class NavigatorView(View):
-
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         input_data = json.loads(request.body)
         # Load all sferiche points
