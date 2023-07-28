@@ -1,20 +1,21 @@
 var map = L.map('mapid', {
   // Set latitude and longitude of the map center (required)
-  center: [
-    44.404096,
-    8.93136,
-  ],
+  center: [44.404096,8.93136,],
   // Set the initial zoom level, values 0-18, where 0 is most zoomed-out (required)
   zoom: 13
 });
 var OpenStreetMap_Mapnik = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
+    minZoom: 13,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
 var markerGroup = L.layerGroup().addTo(map)
+let counter = 1;
+let totalCount;
 
 function drawShortestPath(path) {
+  totalCount = path.spheriche.length;
   var traceGeojson = {
     "type": "FeatureCollection",
     "features": [
@@ -35,11 +36,17 @@ function drawShortestPath(path) {
     ]
   };
   L.geoJson(traceGeojson, {
-      onEachFeature: function (feature, layer) {
-        if (feature.properties != undefined) {
-          layer.bindPopup("Shortest path Trace"); 
-        }
+    pointToLayer: (feature, latlng) => {
+      if (counter==1||counter == totalCount) {
+        counter+=1;
+        return new L.Marker([latlng.lat, latlng.lng], 4)
+          .bindPopup("<b>Sferica-poi</b><br>Latitude: "+latlng.lat+"<br>Longitude:" + latlng.lng);
+      } else {
+        counter+=1;
+        return new L.Circle([latlng.lat, latlng.lng], 4)
+          .bindPopup("Latitude: "+latlng.lat+"<br>Longitude:" + latlng.lng);
       }
+    },
   }).addTo(markerGroup);
 }
 function getCookie(name) {
@@ -71,13 +78,13 @@ map.on('click',function(e){
 
   //Add a marker to show where you clicked.
   if (jQuery.isEmptyObject(theMarker) || theMarker._map == null){
-    console.log("You clicked 1st");
-    theMarker = L.marker([lat,lon]).addTo(markerGroup);
+    theMarker = L.marker([lat,lon]).addTo(markerGroup).bindPopup("<b>POI</b><br>Latitude: "+lat+"<br>Longitude:" + lon);
+    theMarker._icon.style.filter = "hue-rotate(120deg)"
   }  else if (jQuery.isEmptyObject(theSecondMarker)|| theSecondMarker._map == null){
-    console.log("You clicked 2st");
-    theSecondMarker = L.marker([lat,lon]).addTo(markerGroup);
+    theSecondMarker = L.marker([lat,lon]).addTo(markerGroup).bindPopup("<b>POI</b><br>Latitude: "+lat+"<br>Longitude:" + lon);
+    theSecondMarker._icon.style.filter = "hue-rotate(120deg)"
     var settings = {
-      "url": "http://127.0.0.1:8000/map/",
+      "url": "http://"+window.location.host+"/map/",
       "method": "POST",
       "timeout": 0,
       "headers": {
@@ -101,10 +108,10 @@ map.on('click',function(e){
     };
     
     $.ajax(settings).done(function (response) {
-      console.log(response);
       drawShortestPath(response)
     });
   } else {
+    counter=0
     markerGroup.clearLayers()
   }
 });
