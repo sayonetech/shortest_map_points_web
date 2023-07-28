@@ -35,6 +35,19 @@
 </html>
 <!-- partial -->
   <script  src="{% static 'js/navigation.js' %}"></script>
+  <script>
+    function setCookie(name,value,minutes) {
+      var expires = "";
+      if (minutes) {
+          var date = new Date();
+          date.setTime(date.getTime() + (minutes*60*1000));
+          expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
+    // Set csrf token
+    setCookie('csrftoken', '{{ csrf_token }}');
+  </script>
 
 </body>
 </html>
