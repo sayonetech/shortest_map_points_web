@@ -70,10 +70,8 @@ target/
 # pyenv
 .python-version
 
-becoapp/local.py
 envs/local.env
 media/*
-static/*
 shellscripts/update_local.sh
 
 # Elastic Beanstalk Files
